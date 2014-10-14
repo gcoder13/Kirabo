@@ -2,7 +2,6 @@ package com.kirabo.console.filter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Enumeration;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -10,6 +9,8 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 public class AuthnFilter implements Filter {
 
@@ -28,22 +29,35 @@ public class AuthnFilter implements Filter {
         servletResponse.setContentType("text/html");
         System.out.println("testtinnnnnnng");
         PrintWriter out = servletResponse.getWriter();
-        out.println("my-param (InitParameter): "
-                + filterConfig.getInitParameter("my-param"));
-        out.println("<br/><br/>Parameters:<br/>");
-        Enumeration<String> parameterNames = servletRequest.getParameterNames();
-        if (parameterNames.hasMoreElements()) {
-            while (parameterNames.hasMoreElements()) {
-                String name = parameterNames.nextElement();
-                String value = servletRequest.getParameter(name);
-                out.println("name:" + name + ", value: " + value + "<br/>");
-            }
+        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        HttpSession httpSession = httpServletRequest.getSession();
+        System.out.println("SessionID: " + httpSession.getId());
+        boolean authenticated = false;
+        if (httpSession.getAttribute("authenticated") != null) {
+            authenticated = (Boolean) httpSession.getAttribute("authenticated");
+        }
+        if (authenticated) {
+            out.println("<br/>You have an authenticated session:<br/><hr/>");
+            out.println("<br/>Start Regular Content:<br/><hr/>");
+            filterChain.doFilter(servletRequest, servletResponse);
+            out.println("<br/><hr/>End Regular Content:<br/>");
         } else {
-            out.println("---None---<br/>");
+            String username = httpServletRequest.getParameter("username");
+            String password = httpServletRequest.getParameter("password");
+            if (username != null
+                    && password != null
+                    && ((username.equals("bharath") && password
+                            .equals("bharath")) || (username.equals("geoffrey") && password
+                            .equals("geoffrey")))) {
+                httpSession
+                        .setAttribute("authenticated", Boolean.valueOf(true));
+                out.println("<br/>Start Regular Content:<br/><hr/>");
+                filterChain.doFilter(servletRequest, servletResponse);
+                out.println("<br/><hr/>End Regular Content:<br/>");
+            } else {
+                out.println("<br/>Not Authenticated<br/><hr/>");
+            }
         }
 
-        out.println("<br/>Start Regular Content:<br/><hr/>");
-        filterChain.doFilter(servletRequest, servletResponse);
-        out.println("<br/><hr/>End Regular Content:<br/>");
     }
 }
