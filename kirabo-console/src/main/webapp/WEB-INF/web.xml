@@ -4,4 +4,16 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
+   <filter>
+       <filter-name>AuthnFilter</filter-name>
+       <filter-class>com.kirabo.console.filter.AuthnFilter</filter-class>
+       <init-param>
+           <param-name>my-param</param-name>
+           <param-value>my-param-value</param-value>
+       </init-param>
+   </filter>
+   <filter-mapping>
+       <filter-name>AuthnFilter</filter-name>
+       <url-pattern>/*</url-pattern>
+   </filter-mapping>
 </web-app>

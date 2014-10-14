@@ -18,6 +18,7 @@
     	<groupId>com.kirabo</groupId>
     	<artifactId>kirabo-console-jar</artifactId>
     	<version>${project.version}</version>
+    	<scope>compile</scope>
     </dependency>
   </dependencies>
   <build>
