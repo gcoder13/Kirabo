@@ -1,2 +1,3 @@
 Test 123
 Checkin from branch B. Let us see the behaviour again. 
+Edited from GUI.
