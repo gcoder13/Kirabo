@@ -9,8 +9,9 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+
+import com.kirabo.console.authn.AuthnManagerImpl;
+import com.kirabo.console.authn.AuthnManagerImpl.AUTH_STATUS;
 
 public class AuthnFilter implements Filter {
 
@@ -29,35 +30,36 @@ public class AuthnFilter implements Filter {
         servletResponse.setContentType("text/html");
         System.out.println("testtinnnnnnng");
         PrintWriter out = servletResponse.getWriter();
-        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-        HttpSession httpSession = httpServletRequest.getSession();
-        System.out.println("SessionID: " + httpSession.getId());
-        boolean authenticated = false;
-        if (httpSession.getAttribute("authenticated") != null) {
-            authenticated = (Boolean) httpSession.getAttribute("authenticated");
-        }
-        if (authenticated) {
+
+        AuthnManagerImpl authnManager = new AuthnManagerImpl();
+        AUTH_STATUS authnStatus = authnManager.manageAuthn(servletRequest,
+                servletResponse);
+        switch (authnStatus) {
+        case AUTHENTICATED_ALREADY:
             out.println("<br/>You have an authenticated session:<br/><hr/>");
             out.println("<br/>Start Regular Content:<br/><hr/>");
             filterChain.doFilter(servletRequest, servletResponse);
             out.println("<br/><hr/>End Regular Content:<br/>");
-        } else {
-            String username = httpServletRequest.getParameter("username");
-            String password = httpServletRequest.getParameter("password");
-            if (username != null
-                    && password != null
-                    && ((username.equals("bharath") && password
-                            .equals("bharath")) || (username.equals("geoffrey") && password
-                            .equals("geoffrey")))) {
-                httpSession
-                        .setAttribute("authenticated", Boolean.valueOf(true));
-                out.println("<br/>Start Regular Content:<br/><hr/>");
-                filterChain.doFilter(servletRequest, servletResponse);
-                out.println("<br/><hr/>End Regular Content:<br/>");
-            } else {
-                out.println("<br/>Not Authenticated<br/><hr/>");
-            }
+            break;
+        case AUTHENTICATED_NOW:
+            out.println("<br/>Start Regular Content:<br/><hr/>");
+            filterChain.doFilter(servletRequest, servletResponse);
+            out.println("<br/><hr/>End Regular Content:<br/>");
+            break;
+        case NOT_AUTHENTICATED:
+            out.println("<br/>You are not Authenticated<br/><hr/>");
+            out.println("<br/>");
+            out.println("<tr>");
+            out.println("<input type='text' name='username' value='??'/>");
+            out.println("<input type='text' name='password' value='??'/>");
+            out.println("<td>");
+            out.println("</td>");
+            out.println("<td>");
+            out.println("</td>");
+            out.println("</tr>");
+            break;
+        default:
+            break;
         }
-
     }
 }
