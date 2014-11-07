@@ -1,0 +1,7 @@
+
+<h2>Logout Section</h2>
+
+<form action="logout">
+    <input type="submit" value="Log Out"/>
+</form>
+            

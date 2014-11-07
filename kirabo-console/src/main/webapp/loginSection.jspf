@@ -1,0 +1,9 @@
+
+<h2>Login Section</h2>
+
+<form action="login.do">
+    <input type='text' name='username' value=''/>
+    <input type='text' name='password' value=''/>
+    <input type="submit" value="Log In"/>
+</form>
+            

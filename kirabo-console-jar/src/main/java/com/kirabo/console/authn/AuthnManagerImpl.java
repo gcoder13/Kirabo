@@ -7,7 +7,7 @@ import javax.servlet.http.HttpSession;
 
 public class AuthnManagerImpl {
     public enum AUTH_STATUS {
-        NOT_AUTHENTICATED, AUTHENTICATED_ALREADY, AUTHENTICATED_NOW
+        NOT_AUTHENTICATED, AUTHENTICATED_ALREADY, AUTHENTICATED_NOW, LOGIN_REQUEST, LOGOUT_REQUEST
     }
 
     public AUTH_STATUS manageAuthn(ServletRequest servletRequest,
@@ -16,13 +16,19 @@ public class AuthnManagerImpl {
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpSession httpSession = httpServletRequest.getSession();
-        System.out.println("SessionID: " + httpSession.getId());
+        preProcess(httpServletRequest, httpSession);
         if (httpSession.getAttribute("authenticationStatus") != null) {
             authStatus = (AUTH_STATUS) httpSession
                     .getAttribute("authenticationStatus");
         }
 
-        if (authStatus.equals(AUTH_STATUS.AUTHENTICATED_ALREADY)
+        String url = httpServletRequest.getRequestURL().toString();
+
+        if (url.endsWith("/login.jsp")) {
+            authStatus = AUTH_STATUS.LOGIN_REQUEST;
+        } else if (url.endsWith("/logout")) {
+            authStatus = AUTH_STATUS.LOGOUT_REQUEST;
+        } else if (authStatus.equals(AUTH_STATUS.AUTHENTICATED_ALREADY)
                 || authStatus.equals(AUTH_STATUS.AUTHENTICATED_NOW)) {
             authStatus = AUTH_STATUS.AUTHENTICATED_ALREADY;
         } else {
@@ -39,6 +45,26 @@ public class AuthnManagerImpl {
             }
         }
         httpSession.setAttribute("authenticationStatus", authStatus);
+        postProcess(httpServletRequest, httpSession);
         return authStatus;
+    }
+
+    private void preProcess(HttpServletRequest httpServletRequest,
+            HttpSession httpSession) {
+        String url = httpServletRequest.getRequestURL().toString();
+        System.out.println("SessionID: " + httpSession.getId());
+        System.out.println("URL: " + url);
+        Object authenticationStatus = httpSession
+                .getAttribute("authenticationStatus");
+        System.out.println("Authentication Status before processing: "
+                + authenticationStatus);
+    }
+
+    private void postProcess(HttpServletRequest httpServletRequest,
+            HttpSession httpSession) {
+        Object authenticationStatus = httpSession
+                .getAttribute("authenticationStatus");
+        System.out.println("Authentication Status after processing: "
+                + authenticationStatus);
     }
 }
